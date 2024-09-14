@@ -1,0 +1,244 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <iomanip>
+#include <limits>
+#include <locale>  
+
+using namespace std;
+
+struct ExchangePair {
+    string name;
+    double rate;
+};
+
+ExchangePair pairs[] = {
+    {"RUB/USD", 90.0},
+    {"RUB/EUR", 100.0},
+    {"USD/EUR", 1.1},
+    {"USD/USDT", 1.0},
+    {"USD/BTC", 0.00003}
+};
+
+double userRub = 1000000;     // 1,000,000 RUB
+double terminalRub = 10000;   // 10,000 RUB
+double terminalUsd = 1000;    // 1,000 USD
+double terminalEur = 1000;    // 1,000 EUR
+double terminalUsdt = 1000;   // 1,000 USDT
+double terminalBtc = 1.5;     // 1.5 BTC
+
+void updateRates() {
+    srand(time(0));
+    for (auto &pair : pairs) {
+        double change = (rand() % 11 - 5) / 100.0;
+        pair.rate += pair.rate * change;
+    }
+}
+
+void showRates() {
+    cout << "\nCurrent exchange rates:\n";
+    for (const auto &pair : pairs) {
+        cout << pair.name << ": " << fixed << setprecision(5) << pair.rate << endl;
+    }
+}
+
+void showBalances() {
+    locale loc("");
+    cout.imbue(loc);
+
+    cout << "\nYour balance: " << fixed << setprecision(2) << userRub << " RUB\n";
+    cout << "Terminal balance: "
+         << fixed << setprecision(2)
+         << terminalRub << " RUB, "
+         << terminalUsd << " USD, "
+         << terminalEur << " EUR, "
+         << terminalUsdt << " USDT, "
+         << terminalBtc << " BTC\n";
+}
+
+void exchange(string pairName, double amount, bool isBuying) {
+    for (auto &pair : pairs) {
+        if (pair.name == pairName) {
+            if (pairName == "RUB/USD") {
+                if (isBuying) {
+                    double usd = amount / pair.rate;
+                    if (userRub >= amount && terminalUsd >= usd) {
+                        userRub -= amount;
+                        terminalRub += amount;
+                        terminalUsd -= usd;
+                        cout << "You bought " << fixed << setprecision(2) << usd << " USD\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                } else {
+                    double rub = amount * pair.rate;
+                    if (terminalRub >= rub && terminalUsd >= amount) {
+                        terminalRub -= rub;
+                        terminalUsd += amount;
+                        userRub += rub;
+                        cout << "You sold " << fixed << setprecision(2) << amount << " USD\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                }
+            } else if (pairName == "RUB/EUR") {
+                if (isBuying) {
+                    double eur = amount / pair.rate;
+                    if (userRub >= amount && terminalEur >= eur) {
+                        userRub -= amount;
+                        terminalRub += amount;
+                        terminalEur -= eur;
+                        cout << "You bought " << fixed << setprecision(2) << eur << " EUR\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                } else {
+                    double rub = amount * pair.rate;
+                    if (terminalRub >= rub && terminalEur >= amount) {
+                        terminalRub -= rub;
+                        terminalEur += amount;
+                        userRub += rub;
+                        cout << "You sold " << fixed << setprecision(2) << amount << " EUR\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                }
+            } else if (pairName == "USD/EUR") {
+                if (isBuying) {
+                    double eur = amount / pair.rate;
+                    if (terminalUsd >= amount && terminalEur >= eur) {
+                        terminalUsd -= amount;
+                        terminalEur -= eur;
+                        userRub += amount;
+                        cout << "You bought " << fixed << setprecision(2) << eur << " EUR\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                } else {
+                    double usd = amount * pair.rate;
+                    if (terminalEur >= amount && terminalUsd >= usd) {
+                        terminalEur -= amount;
+                        terminalUsd += usd;
+                        userRub -= usd;
+                        cout << "You sold " << fixed << setprecision(2) << amount << " EUR\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                }
+            } else if (pairName == "USD/USDT") {
+                if (isBuying) {
+                    double usdt = amount / pair.rate;
+                    if (terminalUsd >= amount && terminalUsdt >= usdt) {
+                        terminalUsd -= amount;
+                        terminalUsdt -= usdt;
+                        userRub += amount;
+                        cout << "You bought " << fixed << setprecision(2) << usdt << " USDT\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                } else {
+                    double usd = amount * pair.rate;
+                    if (terminalUsdt >= amount && terminalUsd >= usd) {
+                        terminalUsdt -= amount;
+                        terminalUsd += usd;
+                        userRub -= usd;
+                        cout << "You sold " << fixed << setprecision(2) << amount << " USDT\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                }
+            } else if (pairName == "USD/BTC") {
+                if (isBuying) {
+                    double btc = amount / pair.rate;
+                    if (terminalUsd >= amount && terminalBtc >= btc) {
+                        terminalUsd -= amount;
+                        terminalBtc -= btc;
+                        userRub += amount;
+                        cout << "You bought " << fixed << setprecision(8) << btc << " BTC\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                } else {
+                    double usd = amount * pair.rate;
+                    if (terminalBtc >= amount && terminalUsd >= usd) {
+                        terminalBtc -= amount;
+                        terminalUsd += usd;
+                        userRub -= usd;
+                        cout << "You sold " << fixed << setprecision(8) << amount << " BTC\n";
+                    } else {
+                        cout << "Insufficient funds for exchange.\n";
+                    }
+                }
+            }
+            return;
+        }
+    }
+    cout << "Invalid currency pair.\n";
+}
+
+int main() {
+    int choice;
+    double amount;
+    bool isBuying;
+    string operationType;
+
+    cout << "Welcome to the currency exchange terminal!\n";
+
+    while (true) {
+        showRates();
+        showBalances();
+
+        cout << "\nEnter the number of the currency pair for exchange:\n";
+        cout << "1. RUB/USD\n";
+        cout << "2. RUB/EUR\n";
+        cout << "3. USD/EUR\n";
+        cout << "4. USD/USDT\n";
+        cout << "5. USD/BTC\n";
+        cout << "0. Exit\n";
+
+        while (!(cin >> choice) || choice < 0 || choice > 5) {
+            cout << "Invalid input. Please enter a number between 0 and 5: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+
+        if (choice == 0) {
+            break;
+        }
+
+        cout << "Enter the amount: ";
+        while (!(cin >> amount) || amount <= 0) {
+            cout << "Invalid amount. Please enter a positive number: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+
+        cout << "Enter the type of operation (buy/sell): ";
+        cin >> operationType;
+        isBuying = (operationType == "buy");
+
+        switch (choice) {
+            case 1:
+                exchange("RUB/USD", amount, isBuying);
+                break;
+            case 2:
+                exchange("RUB/EUR", amount, isBuying);
+                break;
+            case 3:
+                exchange("USD/EUR", amount, isBuying);
+                break;
+            case 4:
+                exchange("USD/USDT", amount, isBuying);
+                break;
+            case 5:
+                exchange("USD/BTC", amount, isBuying);
+                break;
+            default:
+                cout << "Invalid choice.\n";
+        }
+
+        updateRates();
+    }
+
+    return 0;
+}
